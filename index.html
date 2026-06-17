@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✈️ 여행 계획 플래너</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --p: #2563eb; --pd: #1e40af; --pl: #dbeafe; --pll: #eff6ff;
+  --a: #f59e0b; --al: #fef3c7;
+  --g: #10b981; --gl: #d1fae5;
+  --r: #ef4444; --rl: #fee2e2;
+  --pu: #8b5cf6; --pul: #ede9fe;
+  --t1: #0f172a; --t2: #475569; --t3: #94a3b8;
+  --bg: #f1f5f9; --card: #fff; --border: #e2e8f0;
+  --rad: 14px; --sh: 0 2px 16px rgba(15,23,42,.07);
+  --sh2: 0 8px 40px rgba(15,23,42,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Pretendard',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;font-size:15px}
+
+/* ═══ HEADER ═══ */
+.site-header{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#1d4ed8 100%);color:#fff;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,.25)}
+.hinner{max-width:1140px;margin:auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.logo-plane{font-size:26px;animation:fly 3s ease-in-out infinite}
+@keyframes fly{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-4px) rotate(5deg)}}
+.logo-text{font-size:18px;font-weight:800;letter-spacing:-.5px}
+.logo-sub{font-size:11px;opacity:.65;font-weight:400;display:block;margin-top:-2px}
+.hnav{display:flex;gap:6px}
+.hnav-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:.2s}
+.hnav-btn:hover{background:rgba(255,255,255,.22)}
+.hnav-btn.active{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.45)}
+
+/* ═══ TABS ═══ */
+.tab-wrap{background:var(--card);border-bottom:1.5px solid var(--border);position:sticky;top:64px;z-index:100;box-shadow:0 1px 8px rgba(15,23,42,.05)}
+.tabs{max-width:1140px;margin:auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 18px;font-size:13.5px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;white-space:nowrap;display:flex;align-items:center;gap:7px;transition:.2s;user-select:none}
+.tab:hover{color:var(--p)}
+.tab.on{color:var(--p);border-bottom-color:var(--p)}
+.tab .badge-count{background:var(--r);color:#fff;font-size:10px;padding:1px 5px;border-radius:10px;min-width:18px;text-align:center}
+
+/* ═══ MAIN ═══ */
+main{max-width:1140px;margin:0 auto;padding:24px 20px 80px}
+.page{display:none}
+.page.on{display:block}
+
+/* ═══ CARD ═══ */
+.card{background:var(--card);border-radius:var(--rad);border:1px solid var(--border);box-shadow:var(--sh);padding:24px;margin-bottom:20px}
+.card-hd{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-hd i{color:var(--p)}
+.card-hd-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.card-hd-row .card-hd{margin-bottom:0}
+
+/* ═══ SEARCH HERO ═══ */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1d4ed8 100%);border-radius:20px;padding:36px 32px 32px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.hero-title{font-size:26px;font-weight:800;margin-bottom:6px;position:relative;z-index:1}
+.hero-sub{font-size:14px;opacity:.75;margin-bottom:28px;position:relative;z-index:1}
+
+/* ═══ FORM ═══ */
+.fg{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
+.fg label{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.4px}
+.fg label i{color:rgba(255,255,255,.7);font-size:12px}
+.fg input,.fg select,.fg textarea{padding:11px 14px;border:1.5px solid rgba(255,255,255,.25);border-radius:9px;font-size:14px;background:rgba(255,255,255,.12);color:#fff;transition:.2s;outline:none;font-family:inherit;-webkit-appearance:none;position:relative;z-index:2}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.45)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:rgba(255,255,255,.65);background:rgba(255,255,255,.2);box-shadow:0 0 0 3px rgba(255,255,255,.1)}
+.fg select option{background:#1e3a5f;color:#fff}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;z-index:1}
+.fgrid .full{grid-column:1/-1}
+
+/* tag input */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:9px;padding:8px 12px;min-height:46px;cursor:text;position:relative;z-index:2}
+.tag-wrap:focus-within{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.18)}
+.itag{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.22);color:#fff;padding:4px 10px;border-radius:20px;font-size:12.5px}
+.itag button{background:none;border:none;color:#fff;cursor:pointer;opacity:.7;font-size:11px;line-height:1;padding:0}
+.itag button:hover{opacity:1}
+#tagInput{background:none;border:none;outline:none;color:#fff;font-size:14px;min-width:100px;flex:1;padding:2px 0}
+#tagInput::placeholder{color:rgba(255,255,255,.4)}
+
+/* ═══ BUTTONS ═══ */
+.btn{padding:10px 20px;border-radius:9px;border:none;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.2s;font-family:inherit;white-space:nowrap}
+.btn-p{background:var(--p);color:#fff}
+.btn-p:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.btn-a{background:var(--a);color:#fff}
+.btn-a:hover{background:#d97706}
+.btn-g{background:var(--g);color:#fff}
+.btn-g:hover{background:#059669}
+.btn-r{background:var(--r);color:#fff}
+.btn-r:hover{background:#dc2626}
+.btn-o{background:transparent;color:var(--p);border:1.5px solid var(--p)}
+.btn-o:hover{background:var(--pl)}
+.btn-ghost{background:var(--pll);color:var(--pd);border:1px solid var(--pl)}
+.btn-ghost:hover{background:var(--pl)}
+.btn-sm{padding:6px 13px;font-size:12.5px;border-radius:7px}
+.btn-xs{padding:4px 10px;font-size:11.5px;border-radius:6px}
+.btn-full{width:100%;justify-content:center;padding:14px;font-size:15px}
+.btn-white{background:#fff;color:var(--pd);font-weight:700;position:relative;z-index:2}
+.btn-white:hover{background:#f0f6ff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,99,235,.2)}
+
+/* ═══ LOADING ═══ */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff}
+.loading-overlay.on{display:flex}
+.spin{width:52px;height:52px;border:4px solid rgba(255,255,255,.2);border-top-color:#60a5fa;border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-msg{font-size:16px;font-weight:600;opacity:.9}
+.load-sub{font-size:13px;opacity:.6}
+
+/* ═══ RESULT ═══ */
+.result-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.meta-chip{background:var(--pll);border:1px solid var(--pl);color:var(--pd);padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px}
+
+/* ═══ ROUTE ═══ */
+.day-block{margin-bottom:18px;border-radius:var(--rad);overflow:hidden;border:1px solid var(--border);box-shadow:var(--sh)}
+.day-hd{background:linear-gradient(90deg,var(--pd),var(--p));color:#fff;padding:12px 20px;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.route-item{background:var(--card);padding:14px 18px;display:flex;align-items:flex-start;gap:14px;border-top:1px solid var(--border);transition:.15s}
+.route-item:hover{background:#f8fafc}
+.ri-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ri-icon.food{background:#fff7ed}
+.ri-icon.sight{background:var(--pll)}
+.ri-icon.transport{background:var(--gl)}
+.ri-icon.hotel{background:var(--pul)}
+.ri-icon.flight{background:#fff7ed}
+.ri-body{flex:1;min-width:0}
+.ri-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.ri-desc{font-size:12.5px;color:var(--t2);line-height:1.5}
+.ri-cost{font-size:13px;font-weight:700;color:var(--p);margin-top:5px}
+.ri-link{font-size:12px;color:var(--g);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+.ri-link:hover{text-decoration:underline}
+.ri-actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:19px;color:#cbd5e1;transition:.2s;padding:4px;line-height:1}
+.fav-btn.on{color:var(--a)}
+.fav-btn:hover{transform:scale(1.2)}
+
+/* ═══ MAP ALTERNATIVE ═══ */
+.map-box{border-radius:var(--rad);overflow:hidden;margin-top:18px;border:1px solid var(--border)}
+.map-hd{background:var(--t1);color:#fff;padding:12px 18px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.map-frame{position:relative;height:320px;background:linear-gradient(135deg,#e0f2fe 0%,#bae6fd 50%,#7dd3fc 100%)}
+.map-iframe{width:100%;height:100%;border:none}
+.map-pins{position:absolute;inset:0;pointer-events:none}
+.map-pin{position:absolute;font-size:22px;transform:translateX(-50%);animation:pinbounce 2s ease-in-out infinite}
+.map-pin:nth-child(2){animation-delay:.3s}
+.map-pin:nth-child(3){animation-delay:.6s}
+.map-pin:nth-child(4){animation-delay:.9s}
+@keyframes pinbounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-7px)}}
+.map-legend{background:var(--card);padding:12px 18px;display:flex;gap:16px;flex-wrap:wrap}
+.map-leg-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--t2);font-weight:500}
+
+/* ═══ EXPENSE ═══ */
+.exp-table{width:100%;border-collapse:collapse}
+.exp-table th,.exp-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:13.5px}
+.exp-table th{background:#f8fafc;font-weight:700;color:var(--t2);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.exp-table td input{border:1.5px solid var(--border);border-radius:7px;padding:7px 11px;font-size:13.5px;width:150px;outline:none;font-family:inherit;transition:.2s}
+.exp-table td input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.exp-summary{background:linear-gradient(135deg,var(--pll),var(--pl));border-radius:var(--rad);padding:20px;margin-top:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.exp-total-num{font-size:28px;font-weight:800;color:var(--pd)}
+.exp-bar-wrap{margin-top:12px}
+.exp-bar-bg{height:9px;border-radius:5px;background:rgba(255,255,255,.6);overflow:hidden}
+.exp-bar-fill{height:100%;border-radius:5px;background:var(--p);transition:.6s}
+
+/* ═══ FAVORITES ═══ */
+.fav-grid{display:grid;gap:12px}
+.fav-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rad);padding:16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
+.fav-emoji{width:48px;height:48px;background:var(--al);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.fav-info{flex:1}
+.fav-name{font-size:15px;font-weight:700}
+.fav-meta{font-size:12px;color:var(--t2);margin-top:3px}
+.fav-del{background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;transition:.2s;padding:4px}
+.fav-del:hover{color:var(--r)}
+
+/* ═══ HISTORY ═══ */
+.hist-grid{display:grid;gap:12px}
+.hist-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rad);padding:18px;cursor:pointer;transition:.2s;box-shadow:var(--sh)}
+.hist-card:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hist-dest{font-size:16px;font-weight:800}
+.hist-date{font-size:12px;color:var(--t3)}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11.5px;padding:3px 10px;border-radius:14px;font-weight:600}
+.chip-b{background:var(--pl);color:var(--pd)}
+.chip-g{background:var(--gl);color:#065f46}
+.chip-a{background:var(--al);color:#78350f}
+.chip-p{background:var(--pul);color:#5b21b6}
+
+/* ═══ SHARE ═══ */
+.share-link-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.share-url-box{flex:1;min-width:200px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:11px 16px;font-size:13px;color:var(--t2);font-family:'Courier New',monospace;word-break:break-all;line-height:1.5}
+.share-btns-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sb{padding:10px 18px;border-radius:9px;border:none;cursor:pointer;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;transition:.2s;font-family:inherit}
+.sb:hover{opacity:.85;transform:translateY(-1px)}
+.sb-copy{background:var(--p);color:#fff}
+.sb-tw{background:#1DA1F2;color:#fff}
+.sb-native{background:#f1f5f9;color:var(--t1);border:1px solid var(--border)}
+#qrSection{display:none;margin-top:20px}
+#qrSection.on{display:block}
+.qr-box{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.qr-canvas-wrap{background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px;display:inline-block;box-shadow:var(--sh)}
+.qr-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+/* ═══ MODAL ═══ */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:500;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:var(--card);border-radius:18px;padding:28px;width:100%;max-width:480px;margin:20px;box-shadow:var(--sh2);animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.modal-fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.modal-fg label{font-size:12.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.4px}
+.modal-fg input,.modal-fg select,.modal-fg textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.modal-fg input:focus,.modal-fg select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--t1);color:#fff;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;transition:.35s;box-shadow:0 4px 20px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
+#toast.on{transform:translateX(-50%) translateY(0)}
+
+/* ═══ EMPTY ═══ */
+.empty{text-align:center;padding:52px 20px;color:var(--t3)}
+.empty i{font-size:52px;opacity:.3;display:block;margin-bottom:14px}
+.empty p{font-size:14px;line-height:1.7}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:640px){
+  .fgrid{grid-template-columns:1fr}
+  .hinner{padding:0 14px}
+  main{padding:16px 12px 60px}
+  .hero{padding:24px 18px 22px}
+  .hero-title{font-size:20px}
+  .exp-table td input{width:110px}
+}
+
+/* ═══ AI STATUS BAR ═══ */
+.ai-bar{background:linear-gradient(90deg,var(--pll),var(--gl));border:1px solid var(--pl);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--pd);display:flex;align-items:center;gap:8px;font-weight:600}
+.ai-bar i{color:var(--g);font-size:14px}
+
+/* ═══ PRICE SECTION ═══ */
+.price-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.price-card{background:var(--pll);border:1px solid var(--pl);border-radius:var(--rad);padding:14px}
+.price-card-title{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.price-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(37,99,235,.1);font-size:13px}
+.price-item:last-child{border:none}
+.price-item-name{color:var(--t1);font-weight:500}
+.price-item-val{color:var(--p);font-weight:700}
+.price-item-tag{font-size:11px;background:var(--gl);color:#065f46;padding:2px 7px;border-radius:8px;font-weight:600}
+@media(max-width:600px){.price-row{grid-template-columns:1fr}}
+
+/* 레이아웃 2컬럼 */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="hinner">
+    <a class="logo" href="#">
+      <span class="logo-plane">✈️</span>
+      <div>
+        <span class="logo-text">여행 계획 플래너</span>
+        <span class="logo-sub">AI 기반 스마트 여행 설계</span>
+      </div>
+    </a>
+    <div class="hnav">
+      <button class="hnav-btn" onclick="gotoTab('history')"><i class="fa fa-clock"></i><span class="pc">기록</span></button>
+      <button class="hnav-btn" onclick="gotoTab('favorites')"><i class="fa fa-star"></i><span class="pc">즐겨찾기</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ TAB BAR ═══ -->
+<div class="tab-wrap">
+  <div class="tabs">
+    <div class="tab on" id="tb-plan"    onclick="gotoTab('plan')">   <i class="fa fa-compass"></i> 계획 세우기</div>
+    <div class="tab"    id="tb-result"  onclick="gotoTab('result')"> <i class="fa fa-route"></i> 여행 루트</div>
+    <div class="tab"    id="tb-expense" onclick="gotoTab('expense')"><i class="fa fa-wallet"></i> 비용 관리</div>
+    <div class="tab"    id="tb-favorites" onclick="gotoTab('favorites')"><i class="fa fa-star"></i> 즐겨찾기 <span class="badge-count" id="fav-cnt" style="display:none">0</span></div>
+    <div class="tab"    id="tb-history" onclick="gotoTab('history')"><i class="fa fa-clock-rotate-left"></i> 이전 기록</div>
+    <div class="tab"    id="tb-share"   onclick="gotoTab('share')">  <i class="fa fa-share-nodes"></i> 공유</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+
+<!-- 계획 세우기 -->
+<div id="pg-plan" class="page on">
+  <div class="hero">
+    <div class="hero-title">🗺️ 어디로 떠나볼까요?</div>
+    <div class="hero-sub">여행지와 기간, 예산을 입력하면 AI가 최적의 루트와 맛집·관광지·교통·숙박을 추천해드려요.</div>
+    <div class="fgrid">
+      <div class="fg">
+        <label><i class="fa fa-location-dot"></i> 여행지 (도시 / 국가)</label>
+        <input type="text" id="iDest" placeholder="예: 도쿄, 방콕, 제주도, 파리…" />
+      </div>
+      <div class="fg">
+        <label><i class="fa fa-users"></i> 인원수</label>
+        <select id="iPeople">
+          <option value="1">1명 (혼자)</option>
+          <option value="2" selected>2명</option>
+          <option value="3">3명</option>
+          <option value="4">4명</option>
+          <option value="5">5명 이상</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fa fa-calendar-days"></i> 여행 시작일</label>
+        <input type="date" id="iStart" />
+      </div>
+      <div class="fg">
+        <label><i class="fa fa-calendar-check"></i> 여행 종료일</label>
+        <input type="date" id="iEnd" />
+      </div>
+      <div class="fg full">
+        <label><i class="fa fa-flag-checkered"></i> 꼭 가고 싶은 곳 <span style="font-size:11px;opacity:.6;font-weight:400;text-transform:none">(입력 후 Enter — 각 1회씩만 루트에 포함)</span></label>
+        <div class="tag-wrap" id="tagWrap" onclick="document.getElementById('tagInput').focus()">
+          <input id="tagInput" type="text" placeholder="예: 도톤보리, 아사쿠사, 시부야…" onkeydown="onTagKey(event)" />
+        </div>
+      </div>
+      <div class="fg">
+        <label><i class="fa fa-money-bill-wave"></i> 총 예산 (원)</label>
+        <input type="number" id="iBudget" placeholder="예: 1000000" min="0" step="10000" />
+      </div>
+      <div class="fg">
+        <label><i class="fa fa-heart"></i> 여행 스타일</label>
+        <select id="iStyle">
+          <option value="관광·문화">🏛️ 관광·문화</option>
+          <option value="맛집 탐방">🍜 맛집 탐방</option>
+          <option value="힐링·휴식">🌿 힐링·휴식</option>
+          <option value="액티비티">🏄 액티비티</option>
+          <option value="쇼핑">🛍️ 쇼핑</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-white btn-full" style="margin-top:22px" onclick="startSearch()">
+      <i class="fa fa-wand-magic-sparkles"></i> AI로 최적 여행 계획 만들기
+    </button>
+  </div>
+</div>
+
+<!-- 여행 루트 -->
+<div id="pg-result" class="page">
+  <div class="card-hd-row card" style="margin-bottom:0;padding-bottom:0;border-bottom:none">
+    <div style="flex:1">
+      <div class="card-hd" style="margin-bottom:6px"><i class="fa fa-route"></i><span id="rTitle">여행 루트</span></div>
+      <div class="result-meta" id="rMeta"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:18px">
+      <button class="btn btn-ghost btn-sm" onclick="openAddModal()"><i class="fa fa-plus"></i> 항목 추가</button>
+      <button class="btn btn-a btn-sm" onclick="doReplan()"><i class="fa fa-shuffle"></i> 다시 추천</button>
+      <button class="btn btn-g btn-sm" onclick="saveHistory()"><i class="fa fa-floppy-disk"></i> 저장</button>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:16px">
+    <!-- 루트 목록 -->
+    <div>
+      <div id="aiBar" class="ai-bar" style="display:none">
+        <i class="fa fa-circle-check"></i> AI가 실제 여행지 정보를 바탕으로 생성한 추천 루트입니다
+      </div>
+      <div id="routeWrap"></div>
+    </div>
+
+    <!-- 사이드: 지도 + 가격 -->
+    <div>
+      <!-- 지도 대안: OpenStreetMap -->
+      <div class="map-box">
+        <div class="map-hd"><i class="fa fa-map"></i> 여행 지도 <span style="font-size:11px;opacity:.6;font-weight:400">(OpenStreetMap)</span></div>
+        <div id="mapWrap" style="height:280px;background:#e0f2fe;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:13px">
+          <div style="text-align:center"><i class="fa fa-map-location-dot" style="font-size:36px;margin-bottom:10px;display:block;opacity:.35"></i>여행 계획을 생성하면 지도가 표시돼요</div>
+        </div>
+        <div class="map-legend" id="mapLegend" style="display:none">
+          <div class="map-leg-item">📍 관광지</div>
+          <div class="map-leg-item">🍜 맛집</div>
+          <div class="map-leg-item">🚌 교통</div>
+          <div class="map-leg-item">🏨 숙박</div>
+        </div>
+      </div>
+
+      <!-- 항공·숙박 가격 추천 -->
+      <div class="card" style="margin-top:16px" id="priceCard" style="display:none">
+        <div class="card-hd"><i class="fa fa-tag"></i> 저렴한 항공·숙박 추천</div>
+        <div id="priceContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 비용 관리 -->
+<div id="pg-expense" class="page">
+  <div class="card">
+    <div class="card-hd"><i class="fa fa-wallet"></i> 방문지별 실제 비용 입력</div>
+    <div style="overflow-x:auto">
+      <table class="exp-table">
+        <thead><tr><th>장소</th><th>종류</th><th>AI 예상</th><th>실제 비용 (원)</th></tr></thead>
+        <tbody id="expBody"></tbody>
+      </table>
+    </div>
+    <div class="exp-summary">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--pd);margin-bottom:4px">💰 총 지출</div>
+        <div class="exp-total-num" id="expTotal">₩0</div>
+        <div style="font-size:12.5px;color:var(--t2);margin-top:4px" id="expRemain"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p btn-sm" onclick="saveExp()"><i class="fa fa-floppy-disk"></i> 저장</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetExp()"><i class="fa fa-rotate-left"></i> 초기화</button>
+      </div>
+    </div>
+    <div class="exp-bar-wrap">
+      <div class="exp-bar-bg"><div class="exp-bar-fill" id="expBar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--t3);margin-top:5px">
+        <span>₩0</span><span id="expBarMax"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 즐겨찾기 -->
+<div id="pg-favorites" class="page">
+  <div class="card">
+    <div class="card-hd"><i class="fa fa-star"></i> 즐겨찾기한 여행지</div>
+    <div id="favList"></div>
+  </div>
+</div>
+
+<!-- 이전 기록 -->
+<div id="pg-history" class="page">
+  <div class="card">
+    <div class="card-hd"><i class="fa fa-clock-rotate-left"></i> 이전 여행 계획 기록</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- 공유 -->
+<div id="pg-share" class="page">
+  <div class="card">
+    <div class="card-hd"><i class="fa fa-share-nodes"></i> 여행 계획 공유하기</div>
+    <p style="font-size:13.5px;color:var(--t2);margin-bottom:18px">링크를 생성하면 누구나 이 URL로 여행 계획을 볼 수 있어요.</p>
+    <div class="share-link-row">
+      <div class="share-url-box" id="shareUrlBox">여행 계획을 먼저 만들어주세요.</div>
+      <button class="btn btn-p btn-sm" onclick="genShareUrl()"><i class="fa fa-link"></i> URL 생성</button>
+    </div>
+    <div class="share-btns-row" id="shareBtns" style="display:none">
+      <button class="sb sb-copy" onclick="copyUrl()"><i class="fa fa-copy"></i> URL 복사</button>
+      <button class="sb sb-tw" onclick="shareTwitter()"><i class="fa-brands fa-x-twitter"></i> X(트위터)</button>
+      <button class="sb sb-native" onclick="shareNative()"><i class="fa fa-share-alt"></i> 다른 앱으로</button>
+    </div>
+    <!-- QR 코드 -->
+    <div id="qrSection">
+      <hr style="border:none;border-top:1px solid var(--border);margin:22px 0">
+      <div class="card-hd"><i class="fa fa-qrcode"></i> QR 코드</div>
+      <div class="qr-box">
+        <div class="qr-canvas-wrap"><div id="qrCanvas"></div></div>
+        <p style="font-size:13px;color:var(--t2)">📱 스마트폰으로 스캔하면 바로 여행 계획을 볼 수 있어요!</p>
+        <div class="qr-actions">
+          <button class="btn btn-ghost btn-sm" onclick="downloadQr()"><i class="fa fa-download"></i> QR 다운로드</button>
+        </div>
+      </div>
+    </div>
+    <!-- 카카오 안내 -->
+    <div style="margin-top:20px;background:var(--al);border:1px solid #fcd34d;border-radius:10px;padding:14px 16px;font-size:13px;color:#78350f;display:flex;gap:8px;align-items:flex-start">
+      <i class="fa fa-circle-info" style="margin-top:2px;flex-shrink:0"></i>
+      <span>카카오톡 공유는 카카오 JavaScript SDK 등록(kakao.com/sdk) 후 연동 가능합니다. 현재는 URL 복사 또는 기타 공유 방법을 이용해 주세요.</span>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- 항목 추가/수정 모달 -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-title"><i class="fa fa-plus" style="color:var(--p)"></i> 여행 항목 추가</div>
+    <div class="modal-fg">
+      <label>장소 이름</label>
+      <input type="text" id="mName" placeholder="예: 신주쿠 골든가이" />
+    </div>
+    <div class="modal-fg">
+      <label>종류</label>
+      <select id="mType">
+        <option value="sight">🏛️ 관광지</option>
+        <option value="food">🍜 맛집</option>
+        <option value="transport">🚌 교통</option>
+        <option value="hotel">🏨 숙박</option>
+        <option value="flight">✈️ 항공</option>
+      </select>
+    </div>
+    <div class="modal-fg">
+      <label>설명</label>
+      <input type="text" id="mDesc" placeholder="간단한 설명" />
+    </div>
+    <div class="modal-fg">
+      <label>예상 비용 (원)</label>
+      <input type="number" id="mCost" placeholder="예: 25000" step="1000" />
+    </div>
+    <div class="modal-fg">
+      <label>Day</label>
+      <select id="mDay"></select>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeAddModal()">취소</button>
+      <button class="btn btn-p" onclick="confirmAddItem()"><i class="fa fa-check"></i> 추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div class="loading-overlay" id="loader">
+  <div class="spin"></div>
+  <div class="load-msg" id="loadMsg">AI가 여행 정보를 검색 중입니다…</div>
+  <div class="load-sub" id="loadSub">실제 여행지 데이터를 바탕으로 최적 루트를 생성하고 있어요</div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════
+// 전역 상태
+// ════════════════════════════════════
+const S = {
+  dest:'', people:2, start:'', end:'', days:0,
+  budget:0, style:'관광·문화', tags:[],
+  route:[], favorites:[], history:[],
+  expenses:{}, shareUrl:'', aiUsed:false
+};
+let qrInstance = null;
+
+// ════════════════════════════════════
+// 초기화
+// ════════════════════════════════════
+(function init(){
+  const t = new Date(), e = new Date(t);
+  e.setDate(e.getDate()+3);
+  document.getElementById('iStart').value = fmt(t);
+  document.getElementById('iEnd').value   = fmt(e);
+
+  // URL 파라미터 복원
+  const p = new URLSearchParams(location.search);
+  if(p.get('dest')){
+    document.getElementById('iDest').value   = p.get('dest')||'';
+    document.getElementById('iStart').value  = p.get('start')||fmt(t);
+    document.getElementById('iEnd').value    = p.get('end')||fmt(e);
+    document.getElementById('iPeople').value = p.get('people')||'2';
+    document.getElementById('iBudget').value = p.get('budget')||'';
+    document.getElementById('iStyle').value  = p.get('style')||'관광·문화';
+    const sharedRoute = p.get('route');
+    if(sharedRoute){
+      try{
+        S.route = JSON.parse(decodeURIComponent(sharedRoute));
+        S.dest = p.get('dest'); S.start = p.get('start'); S.end = p.get('end');
+        S.people = p.get('people'); S.budget = parseInt(p.get('budget'))||0;
+        S.style = p.get('style');
+        S.days = calcDays(S.start, S.end);
+        renderRoute(); renderExp(); gotoTab('result');
+        toast('🔗 공유된 여행 계획을 불러왔어요!');
+      }catch(e){}
+    }
+  }
+})();
+
+function fmt(d){ return d.toISOString().split('T')[0]; }
+function calcDays(s,e){ return Math.max(1, Math.round((new Date(e)-new Date(s))/86400000)+1); }
+
+// ════════════════════════════════════
+// 탭
+// ════════════════════════════════════
+function gotoTab(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pg-'+name).classList.add('on');
+  const tb = document.getElementById('tb-'+name);
+  if(tb) tb.classList.add('on');
+  if(name==='favorites') renderFav();
+  if(name==='history')   renderHist();
+  if(name==='expense')   renderExp();
+}
+
+// ════════════════════════════════════
+// 태그
+// ════════════════════════════════════
+const tags=[];
+function onTagKey(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(/,$/,'');
+    if(v && !tags.includes(v)){ tags.push(v); renderTags(); }
+    e.target.value='';
+  }
+}
+function renderTags(){
+  const wrap=document.getElementById('tagWrap');
+  const inp=document.getElementById('tagInput');
+  wrap.innerHTML='';
+  tags.forEach((t,i)=>{
+    const s=document.createElement('span');
+    s.className='itag';
+    s.innerHTML=`${t}<button onclick="rmTag(${i})">✕</button>`;
+    wrap.appendChild(s);
+  });
+  wrap.appendChild(inp);
+}
+function rmTag(i){ tags.splice(i,1); renderTags(); }
+
+// ════════════════════════════════════
+// 검색 실행 → Claude API 호출
+// ════════════════════════════════════
+async function startSearch(){
+  const dest   = document.getElementById('iDest').value.trim();
+  const start  = document.getElementById('iStart').value;
+  const end    = document.getElementById('iEnd').value;
+  const people = document.getElementById('iPeople').value;
+  const budget = parseInt(document.getElementById('iBudget').value)||500000;
+  const style  = document.getElementById('iStyle').value;
+
+  if(!dest){ toast('⚠️ 여행지를 입력해주세요!'); return; }
+  if(!start||!end){ toast('⚠️ 여행 기간을 선택해주세요!'); return; }
+  if(end<start){ toast('⚠️ 종료일이 시작일보다 앞에 있어요!'); return; }
+
+  const days = calcDays(start,end);
+  Object.assign(S,{dest,people,start,end,days,budget,style,tags:[...tags]});
+
+  showLoader('AI가 '+dest+' 여행 정보를 검색 중…','맛집·관광지·숙박·교통 데이터를 분석하고 있어요');
+
+  try{
+    const route = await fetchAIRoute(dest,days,budget,style,tags,people);
+    S.route = route;
+    S.aiUsed = true;
+  }catch(err){
+    console.warn('AI 오류, 폴백 사용:', err);
+    S.route = fallbackRoute(dest,days,budget,style,tags,people);
+    S.aiUsed = false;
+  }
+
+  hideLoader();
+  renderRoute();
+  renderExp();
+  buildMap(dest);
+  buildPriceCard(dest,budget,days,people);
+  gotoTab('result');
+  toast('✅ '+dest+' 여행 계획이 완성됐어요!');
+}
+
+// ════════════════════════════════════
+// Claude API 호출
+// ════════════════════════════════════
+async function fetchAIRoute(dest,days,budget,style,userTags,people){
+  const tagStr = userTags.length ? `\n꼭 가고 싶은 곳(각 1회만 포함): ${userTags.join(', ')}` : '';
+  const prompt = `당신은 전문 여행 플래너입니다. 아래 조건에 맞는 상세한 여행 루트를 JSON으로 작성해주세요.
+
+여행지: ${dest}
+기간: ${days}일
+인원: ${people}명
+총 예산: ${budget.toLocaleString()}원${tagStr}
+여행 스타일: ${style}
+
+규칙:
+1. 꼭 가고 싶은 곳은 전체 루트에서 각 1번씩만 등장시키세요 (중복 금지).
+2. 실제 존재하는 유명 맛집, 관광지, 교통수단, 숙박 이름을 사용하세요.
+3. 예산 안에서 배분하세요.
+4. 첫날에는 반드시 교통(공항→숙소) 항목을 추가하세요.
+5. 숙박은 마지막 날을 제외하고 매일 1개 추가하세요.
+6. 각 항목의 예상 비용(원)은 현실적으로 책정하세요 (항공 제외).
+
+아래 JSON 배열만 반환하세요 (설명 없이):
+[
+  {
+    "day": 1,
+    "type": "transport|sight|food|hotel|flight",
+    "name": "장소/수단 이름",
+    "desc": "구체적인 설명 (영업시간, 특징, 팁 등)",
+    "cost": 15000,
+    "tip": "현지 꿀팁 (선택)"
+  }
+]`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:3000,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+
+  if(!res.ok) throw new Error('API 오류 '+res.status);
+  const data = await res.json();
+  const text = data.content.map(c=>c.text||'').join('');
+  // JSON 추출
+  const match = text.match(/\[[\s\S]*\]/);
+  if(!match) throw new Error('JSON 파싱 실패');
+  const parsed = JSON.parse(match[0]);
+  // idx 추가
+  return parsed.map((item,i)=>({...item, idx:i, fav:false}));
+}
+
+// ════════════════════════════════════
+// 폴백 루트 (API 실패 시)
+// ════════════════════════════════════
+function fallbackRoute(dest,days,budget,style,userTags,people){
+  const styleMap={
+    '관광·문화':['역사박물관 투어','왕궁·사원 탐방','전망대 뷰포인트','전통 문화 체험'],
+    '맛집 탐방':['현지 시장 길거리 음식','유명 라멘·국수 전문점','신선 해산물 레스토랑','현지 디저트 카페'],
+    '힐링·휴식':['온천·스파 체험','해변 산책','공원 피크닉','힐링 카페'],
+    '액티비티':['서핑·수상 스포츠','등산·트레킹','ATV·집라인 투어','스노클링'],
+    '쇼핑':['현지 마켓·야시장','면세점·쇼핑몰','기념품 거리','로컬 편집숍']
+  };
+  const foods=['🍜 현지 명물 면 요리','🥘 향토 음식 정식','🍣 신선한 해산물','🥗 퓨전 현지 요리','🍛 전통 카레 세트','🍱 현지 도시락','🧁 유명 디저트 카페'];
+  const transports=['🚌 시내버스·트램','🚇 지하철·MRT','🚕 그랩·택시','🛵 전동킥보드 렌탈','🚶 도보 이동','🚢 페리·수상버스'];
+  const hotels=['비즈니스 호텔 (3성)','게스트하우스·호스텔','에어비앤비 아파트','부티크 호텔 (4성)','시내 중심 호텔'];
+  const budgetPerDay = Math.floor(budget/days);
+  const sights = styleMap[style]||styleMap['관광·문화'];
+
+  const route=[];
+  let idx=0;
+  // 사용자 태그 큐 (각 1회만 사용)
+  const tagQueue=[...userTags];
+
+  // 첫날 항공
+  route.push({idx:idx++,day:1,type:'flight',name:'✈️ '+dest+' 국제선/국내선',desc:'인천 → '+dest+' 이동 (저가항공 기준)',cost:Math.floor(budget*0.15),fav:false,tip:'항공권은 2~3개월 전 예약 시 최대 50% 절약 가능!'});
+
+  for(let d=1;d<=days;d++){
+    // 교통
+    route.push({idx:idx++,day:d,type:'transport',name:transports[d%transports.length],desc:dest+' 시내 이동',cost:Math.floor(budgetPerDay*0.08),fav:false});
+    // 태그 우선
+    if(tagQueue.length>0){
+      const tag=tagQueue.shift();
+      route.push({idx:idx++,day:d,type:'sight',name:'📍 '+tag,desc:'직접 선택한 방문지 — '+dest+' 내 위치',cost:Math.floor(budgetPerDay*0.2),fav:false,tip:'미리 예약하면 대기 없이 입장 가능해요!'});
+    }
+    // 일반 관광
+    const sName=sights[(d*2)%sights.length];
+    route.push({idx:idx++,day:d,type:'sight',name:'🏛️ '+sName,desc:dest+' 대표 명소',cost:Math.floor(budgetPerDay*0.22),fav:false});
+    // 음식
+    route.push({idx:idx++,day:d,type:'food',name:foods[d%foods.length],desc:'현지인 추천 맛집',cost:Math.floor(budgetPerDay*0.25),fav:false});
+    // 숙박 (마지막 날 제외)
+    if(d<days) route.push({idx:idx++,day:d,type:'hotel',name:'🏨 '+hotels[d%hotels.length],desc:dest+' 시내 중심 ('+people+'인)',cost:Math.floor(budgetPerDay*0.3),fav:false,tip:'예약닷컴·아고다·호텔스컴바인 비교 추천'});
+  }
+  return route;
+}
+
+// ════════════════════════════════════
+// 루트 렌더링
+// ════════════════════════════════════
+function renderRoute(){
+  const {dest,days,start,end,budget,people,style,aiUsed} = S;
+  document.getElementById('rTitle').textContent = dest+' 여행 루트';
+  // 메타 칩
+  document.getElementById('rMeta').innerHTML = [
+    `<div class="meta-chip"><i class="fa fa-calendar"></i>${start} ~ ${end} (${days}일)</div>`,
+    `<div class="meta-chip"><i class="fa fa-users"></i>${people}명</div>`,
+    `<div class="meta-chip"><i class="fa fa-money-bill"></i>₩${(budget||0).toLocaleString()}</div>`,
+    `<div class="meta-chip"><i class="fa fa-heart"></i>${style}</div>`,
+    aiUsed?`<div class="meta-chip" style="background:var(--gl);border-color:var(--g);color:#065f46"><i class="fa fa-robot"></i>AI 추천</div>`:''
+  ].join('');
+
+  // AI 바
+  document.getElementById('aiBar').style.display = aiUsed ? 'flex' : 'none';
+
+  // 그룹화
+  const grouped={};
+  S.route.forEach((item,i)=>{item.idx=i;(grouped[item.day]||(grouped[item.day]=[])).push(item)});
+
+  const wrap = document.getElementById('routeWrap');
+  wrap.innerHTML='';
+  const iconMap={food:'🍜',sight:'🏛️',transport:'🚌',hotel:'🏨',flight:'✈️'};
+  const iconClass={food:'food',sight:'sight',transport:'transport',hotel:'hotel',flight:'flight'};
+  const iName={food:'fa-utensils',sight:'fa-camera',transport:'fa-bus',hotel:'fa-hotel',flight:'fa-plane'};
+
+  Object.keys(grouped).sort((a,b)=>a-b).forEach(day=>{
+    const sd=new Date(S.start); sd.setDate(sd.getDate()+parseInt(day)-1);
+    const dayStr=sd.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+    const block=document.createElement('div'); block.className='day-block';
+    block.innerHTML=`<div class="day-hd"><i class="fa fa-sun"></i> Day ${day} · ${dayStr}</div>`;
+    grouped[day].forEach(item=>{
+      const el=document.createElement('div'); el.className='route-item';
+      el.innerHTML=`
+        <div class="ri-icon ${iconClass[item.type]||'sight'}">${iconMap[item.type]||'📍'}</div>
+        <div class="ri-body">
+          <div class="ri-name">${item.name}</div>
+          <div class="ri-desc">${item.desc||''}${item.tip?`<br><span style="color:var(--g);font-weight:600">💡 ${item.tip}</span>`:''}</div>
+          <div class="ri-cost">예상 ₩${(item.cost||0).toLocaleString()}</div>
+        </div>
+        <div class="ri-actions">
+          <button class="fav-btn ${item.fav?'on':''}" onclick="toggleFav(${item.idx})" title="즐겨찾기">
+            <i class="${item.fav?'fa-solid':'fa-regular'} fa-star"></i>
+          </button>
+          <button class="btn btn-r btn-xs" onclick="delItem(${item.idx})"><i class="fa fa-trash"></i></button>
+        </div>`;
+      block.appendChild(el);
+    });
+    wrap.appendChild(block);
+  });
+
+  // Day 셀렉트 채우기
+  const ds=document.getElementById('mDay'); ds.innerHTML='';
+  for(let d=1;d<=Math.max(days,1);d++) ds.innerHTML+=`<option value="${d}">Day ${d}</option>`;
+}
+
+// ════════════════════════════════════
+// 지도 (OpenStreetMap Nominatim + iframe)
+// ════════════════════════════════════
+async function buildMap(dest){
+  const wrap=document.getElementById('mapWrap');
+  wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);gap:8px;font-size:13px"><i class="fa fa-spinner fa-spin"></i> 지도 로딩 중…</div>';
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(dest)}&format=json&limit=1`);
+    const data=await r.json();
+    if(data&&data[0]){
+      const {lat,lon}=data[0];
+      wrap.innerHTML=`<iframe class="map-iframe" src="https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(lon)-0.05},${parseFloat(lat)-0.05},${parseFloat(lon)+0.05},${parseFloat(lat)+0.05}&layer=mapnik&marker=${lat},${lon}" allowfullscreen loading="lazy"></iframe>`;
+      document.getElementById('mapLegend').style.display='flex';
+    } else {
+      wrap.innerHTML=`<div style="text-align:center;color:var(--t3);font-size:13px;padding:30px"><i class="fa fa-map-location-dot" style="font-size:36px;margin-bottom:10px;display:block;opacity:.3"></i>${dest} 지도를 찾을 수 없어요</div>`;
+    }
+  }catch(e){
+    wrap.innerHTML=`<div style="text-align:center;color:var(--t3);font-size:13px;padding:30px"><i class="fa fa-wifi" style="font-size:28px;margin-bottom:8px;display:block;opacity:.3"></i>지도를 불러오려면 인터넷 연결이 필요해요<br><small>OpenStreetMap 연결 실패</small></div>`;
+  }
+}
+
+// ════════════════════════════════════
+// 항공·숙박 가격 추천
+// ════════════════════════════════════
+function buildPriceCard(dest,budget,days,people){
+  const card=document.getElementById('priceCard');
+  card.style.display='block';
+  const flightBudget=Math.floor(budget*0.25);
+  const hotelBudget=Math.floor(budget*0.3/days);
+  document.getElementById('priceContent').innerHTML=`
+    <div class="price-row">
+      <div class="price-card">
+        <div class="price-card-title"><i class="fa fa-plane" style="color:var(--p)"></i> 저렴한 항공편</div>
+        <div class="price-item"><span class="price-item-name">네이버 항공</span><a href="https://flight.naver.com" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">스카이스캐너</span><a href="https://skyscanner.co.kr" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">카약(KAYAK)</span><a href="https://kayak.co.kr" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">추천 예산</span><span class="price-item-val">₩${flightBudget.toLocaleString()}</span></div>
+      </div>
+      <div class="price-card">
+        <div class="price-card-title"><i class="fa fa-hotel" style="color:var(--pu)"></i> 저렴한 숙박</div>
+        <div class="price-item"><span class="price-item-name">야놀자 / 여기어때</span><a href="https://www.yanolja.com" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">아고다</span><a href="https://www.agoda.com" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">부킹닷컴</span><a href="https://www.booking.com" target="_blank" class="price-item-tag">검색↗</a></div>
+        <div class="price-item"><span class="price-item-name">1박 추천 예산</span><span class="price-item-val">₩${hotelBudget.toLocaleString()}</span></div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--t3);margin-top:10px"><i class="fa fa-circle-info"></i> 위 링크에서 "${dest}" 검색 후 날짜를 입력하면 최저가 비교가 가능합니다.</p>`;
+}
+
+// ════════════════════════════════════
+// 즐겨찾기
+// ════════════════════════════════════
+function toggleFav(idx){
+  const item=S.route[idx];
+  item.fav=!item.fav;
+  if(item.fav){ S.favorites.push({...item}); toast('⭐ 즐겨찾기에 추가됐어요!'); }
+  else{ S.favorites=S.favorites.filter(f=>f.name!==item.name); toast('즐겨찾기에서 제거됐어요.'); }
+  updateFavCount(); renderRoute();
+}
+function updateFavCount(){
+  const cnt=document.getElementById('fav-cnt');
+  if(S.favorites.length>0){cnt.style.display='inline';cnt.textContent=S.favorites.length;}
+  else cnt.style.display='none';
+}
+function renderFav(){
+  const el=document.getElementById('favList');
+  if(!S.favorites.length){el.innerHTML=`<div class="empty"><i class="fa fa-star"></i><p>즐겨찾기한 여행지가 없어요.<br>루트에서 ⭐를 눌러보세요!</p></div>`;return;}
+  const emap={food:'🍜',sight:'📍',transport:'🚌',hotel:'🏨',flight:'✈️'};
+  el.innerHTML=`<div class="fav-grid">${S.favorites.map((f,i)=>`
+    <div class="fav-card">
+      <div class="fav-emoji">${emap[f.type]||'📍'}</div>
+      <div class="fav-info">
+        <div class="fav-name">${f.name}</div>
+        <div class="fav-meta">${f.desc||''} · 예상 ₩${(f.cost||0).toLocaleString()} · Day ${f.day}</div>
+      </div>
+      <button class="fav-del" onclick="rmFav(${i})" title="제거"><i class="fa fa-times"></i></button>
+    </div>`).join('')}</div>`;
+}
+function rmFav(i){
+  const rm=S.favorites.splice(i,1)[0];
+  const ri=S.route.findIndex(r=>r.name===rm.name);
+  if(ri>=0) S.route[ri].fav=false;
+  updateFavCount(); renderFav();
+  if(document.getElementById('pg-result').classList.contains('on')) renderRoute();
+  toast('즐겨찾기에서 제거됐어요.');
+}
+
+// ════════════════════════════════════
+// 항목 삭제
+// ════════════════════════════════════
+function delItem(idx){
+  S.route.splice(idx,1);
+  renderRoute(); renderExp();
+  toast('🗑️ 항목이 삭제됐어요.');
+}
+
+// ════════════════════════════════════
+// 다시 추천
+// ════════════════════════════════════
+async function doReplan(){
+  if(!S.dest){toast('⚠️ 먼저 계획을 만들어주세요!');return;}
+  showLoader('새로운 루트를 생성 중…','다른 맛집과 관광지를 찾고 있어요');
+  try{
+    S.route=await fetchAIRoute(S.dest,S.days,S.budget,S.style,S.tags,S.people);
+    S.aiUsed=true;
+  }catch(e){
+    S.route=fallbackRoute(S.dest,S.days,S.budget,S.style,S.tags,S.people);
+    S.aiUsed=false;
+  }
+  hideLoader(); renderRoute(); renderExp();
+  toast('✨ 새로운 루트가 완성됐어요!');
+}
+
+// ════════════════════════════════════
+// 항목 추가 모달
+// ════════════════════════════════════
+function openAddModal(){ document.getElementById('addModal').classList.add('on'); }
+function closeAddModal(){ document.getElementById('addModal').classList.remove('on'); }
+function confirmAddItem(){
+  const name=document.getElementById('mName').value.trim();
+  if(!name){toast('⚠️ 장소 이름을 입력해주세요!');return;}
+  S.route.push({idx:S.route.length,day:parseInt(document.getElementById('mDay').value)||1,type:document.getElementById('mType').value,name,desc:document.getElementById('mDesc').value||'직접 추가',cost:parseInt(document.getElementById('mCost').value)||0,fav:false});
+  S.route.sort((a,b)=>a.day-b.day);
+  renderRoute(); renderExp(); closeAddModal();
+  toast('✅ 항목이 추가됐어요!');
+}
+document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+
+// ════════════════════════════════════
+// 비용 관리
+// ════════════════════════════════════
+function renderExp(){
+  const tbody=document.getElementById('expBody');
+  if(!S.route.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:28px">여행 계획을 먼저 만들어주세요.</td></tr>';return;}
+  const tmap={food:'🍜 음식',sight:'🏛️ 관광',transport:'🚌 교통',hotel:'🏨 숙박',flight:'✈️ 항공'};
+  tbody.innerHTML=S.route.map((item,i)=>`<tr>
+    <td style="font-weight:600">${item.name}</td>
+    <td><span class="chip chip-b">${tmap[item.type]||'기타'}</span></td>
+    <td style="color:var(--t2)">₩${(item.cost||0).toLocaleString()}</td>
+    <td><input type="number" id="ei${i}" placeholder="0" min="0" step="1000" value="${S.expenses[i]||''}" oninput="calcExpTotal()"></td>
+  </tr>`).join('');
+  document.getElementById('expBarMax').textContent='₩'+(S.budget||0).toLocaleString();
+  calcExpTotal();
+}
+function calcExpTotal(){
+  let total=0;
+  S.route.forEach((_,i)=>{const el=document.getElementById('ei'+i);if(el)total+=parseInt(el.value)||0;});
+  document.getElementById('expTotal').textContent='₩'+total.toLocaleString();
+  const pct=S.budget?Math.min(100,Math.round(total/S.budget*100)):0;
+  document.getElementById('expBar').style.width=pct+'%';
+  document.getElementById('expBar').style.background=pct>90?'var(--r)':pct>70?'var(--a)':'var(--p)';
+  const remain=S.budget-total;
+  document.getElementById('expRemain').textContent=S.budget?(remain>=0?`예산 대비 ₩${remain.toLocaleString()} 남음`:`⚠️ 예산 ₩${Math.abs(remain).toLocaleString()} 초과`):'예산을 설정해주세요';
+}
+function saveExp(){
+  S.route.forEach((_,i)=>{const el=document.getElementById('ei'+i);if(el)S.expenses[i]=parseInt(el.value)||0;});
+  toast('💾 비용이 저장됐어요!');
+}
+function resetExp(){
+  S.expenses={};
+  S.route.forEach((_,i)=>{const el=document.getElementById('ei'+i);if(el)el.value='';});
+  calcExpTotal(); toast('🔄 초기화됐어요.');
+}
+
+// ════════════════════════════════════
+// 기록
+// ════════════════════════════════════
+function saveHistory(){
+  if(!S.dest){toast('⚠️ 먼저 여행 계획을 만들어주세요!');return;}
+  S.history.unshift({...S,savedAt:new Date().toLocaleString('ko-KR'),route:[...S.route]});
+  toast('📚 기록에 저장됐어요!');
+}
+function renderHist(){
+  const el=document.getElementById('histList');
+  if(!S.history.length){el.innerHTML=`<div class="empty"><i class="fa fa-clock-rotate-left"></i><p>저장된 기록이 없어요.<br>루트 탭의 저장 버튼을 눌러보세요!</p></div>`;return;}
+  el.innerHTML=`<div class="hist-grid">${S.history.map((h,i)=>`
+    <div class="hist-card" onclick="loadHist(${i})">
+      <div class="hist-top"><div class="hist-dest">✈️ ${h.dest}</div><div class="hist-date">${h.savedAt}</div></div>
+      <div class="chip-row">
+        <span class="chip chip-b">${h.days}일</span>
+        <span class="chip chip-g">${h.people}명</span>
+        <span class="chip chip-a">₩${(h.budget||0).toLocaleString()}</span>
+        <span class="chip chip-p">${h.style}</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+function loadHist(i){
+  Object.assign(S,S.history[i],{history:S.history,favorites:S.favorites});
+  renderRoute(); renderExp(); gotoTab('result');
+  toast(`📂 "${S.dest}" 기록을 불러왔어요!`);
+}
+
+// ════════════════════════════════════
+// 공유 (URL 파라미터 방식)
+// ════════════════════════════════════
+function genShareUrl(){
+  if(!S.dest){toast('⚠️ 먼저 여행 계획을 만들어주세요!');return;}
+  const routeStr = encodeURIComponent(JSON.stringify(S.route));
+  const params = new URLSearchParams({
+    dest:S.dest, start:S.start, end:S.end,
+    people:S.people, budget:S.budget, style:S.style,
+    route:routeStr
+  });
+  S.shareUrl = location.origin + location.pathname + '?' + params.toString();
+  document.getElementById('shareUrlBox').textContent = S.shareUrl;
+  document.getElementById('shareBtns').style.display='flex';
+  // QR 생성
+  genQR(S.shareUrl);
+  toast('🔗 공유 URL이 생성됐어요!');
+}
+
+function genQR(url){
+  const sec=document.getElementById('qrSection');
+  sec.classList.add('on');
+  const canvas=document.getElementById('qrCanvas');
+  canvas.innerHTML='';
+  if(qrInstance){ try{qrInstance.clear();}catch(e){} }
+  try{
+    qrInstance = new QRCode(canvas,{
+      text: url,
+      width: 160,
+      height: 160,
+      colorDark: '#0f172a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }catch(e){ canvas.innerHTML='<p style="color:var(--t3);font-size:12px">QR 생성 오류</p>'; }
+}
+
+function downloadQr(){
+  const img = document.querySelector('#qrCanvas img');
+  if(!img){toast('⚠️ QR코드를 먼저 생성해주세요!');return;}
+  const a=document.createElement('a');
+  a.href=img.src; a.download='여행계획_QR.png'; a.click();
+  toast('📥 QR코드가 다운로드됐어요!');
+}
+
+function copyUrl(){
+  if(!S.shareUrl){toast('⚠️ URL을 먼저 생성해주세요!');return;}
+  navigator.clipboard.writeText(S.shareUrl).then(()=>toast('✅ URL이 복사됐어요!'));
+}
+function shareTwitter(){
+  const txt=encodeURIComponent(`${S.dest} ${S.days}일 여행 계획 공유! ✈️`);
+  window.open(`https://twitter.com/intent/tweet?text=${txt}&url=${encodeURIComponent(S.shareUrl)}`,'_blank');
+}
+function shareNative(){
+  if(navigator.share){
+    navigator.share({title:`${S.dest} 여행 계획`,text:`✈️ ${S.dest} ${S.days}일 여행 계획`,url:S.shareUrl});
+  } else { toast('이 기기는 공유 기능을 지원하지 않아요. URL을 복사해 사용하세요.'); }
+}
+
+// ════════════════════════════════════
+// 로딩
+// ════════════════════════════════════
+function showLoader(msg,sub){
+  document.getElementById('loadMsg').textContent=msg||'로딩 중…';
+  document.getElementById('loadSub').textContent=sub||'';
+  document.getElementById('loader').classList.add('on');
+}
+function hideLoader(){ document.getElementById('loader').classList.remove('on'); }
+
+// ════════════════════════════════════
+// 토스트
+// ════════════════════════════════════
+let _toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove('on'),2600);
+}
+</script>
+
+<!-- ════════════════════════════════════════════
+📚 코드 설명 — 초등학생도 이해할 수 있는 3단계
+═══════════════════════════════════════════════
+
+🟡 1단계 | 이 앱은 뭘 하는 건가요?
+────────────────────────────────
+이 HTML 파일 하나가 곧 '여행 계획 앱'이에요.
+마치 스마트한 여행사 직원처럼, 내가 가고 싶은 여행지·날짜·예산을 알려주면
+AI(Claude)가 실제 맛집, 관광지, 교통, 숙박을 자동으로 골라서 날짜별 루트를 만들어줘요.
+지도도 보여주고, 공유 링크와 QR코드도 만들어주고, 비용 계산도 해줘요!
+
+🟠 2단계 | 어떤 재료로 만들어졌나요?
+────────────────────────────────
+① HTML (뼈대 · 집의 벽과 문)
+   → 화면에 보이는 입력칸, 버튼, 표, 탭을 만들어요.
+   → <div>, <input>, <button>, <table> 같은 태그들이 레이아웃을 구성해요.
+
+② CSS (옷 · 인테리어)
+   → 색깔, 둥근 모서리, 그림자, 글씨체 등을 꾸며요.
+   → :root { --p: #2563eb } 처럼 '변수'로 파란색 이름을 저장해 여러 곳에 재사용해요.
+   → @media(max-width:640px) 는 '폰 화면이 좁으면 레이아웃을 바꿔줘!'라는 뜻이에요.
+
+③ JavaScript (두뇌 · 엔진)
+   → 버튼 클릭, 계산, API 통신, 화면 업데이트 등을 담당해요.
+   → const S = { ... } 라는 바구니에 여행지·날짜·루트 등 모든 정보를 담아요.
+   → async/await 는 '기다렸다가 정보가 오면 그때 처리해'라는 뜻이에요.
+
+④ 외부 도구들
+   → Font Awesome : 아이콘(✈️ 별모양 등) 모음
+   → QRCode.js    : QR코드 그림을 자동으로 만들어주는 도구
+   → OpenStreetMap: 구글 맵 대신 무료로 쓸 수 있는 지도 서비스
+   → Claude API   : AI에게 "도쿄 3일 루트 만들어줘!"라고 요청하는 통신
+
+🟢 3단계 | 주요 기능은 어떻게 작동하나요?
+────────────────────────────────
+① 검색 → startSearch() 함수
+   → 입력값을 확인(빈칸이면 경고!)
+   → Claude AI에게 JSON 형식으로 루트를 요청해요(fetchAIRoute)
+   → AI가 답을 보내오면 S.route 바구니에 담아 화면에 그려요
+
+② 꼭 가고 싶은 곳 처리 → tagQueue
+   → 사용자가 추가한 태그들을 줄 세워서(Queue) 하루에 하나씩만 꺼내 쓰는 방식이에요
+   → 그래서 매일 같은 장소가 반복되지 않아요!
+
+③ 지도 → buildMap() 함수
+   → OpenStreetMap Nominatim API에 "도쿄가 어디야?"라고 물어봐요
+   → 좌표(위도·경도)를 받으면 iframe 안에 지도를 보여줘요 (구글 API 없이!)
+
+④ QR코드 → genQR() 함수
+   → QRCode.js 라이브러리가 URL 텍스트를 점의 패턴(QR 코드)으로 변환해요
+   → 스마트폰 카메라로 스캔하면 바로 여행 계획을 볼 수 있어요
+
+⑤ URL 공유 → genShareUrl() 함수
+   → 여행 정보와 루트를 URL 주소 끝에 ?dest=도쿄&route=... 형태로 붙여요
+   → 이 링크를 여는 사람은 같은 계획을 볼 수 있어요 (서버 없이도 공유 가능!)
+
+⑥ 비용 계산 → calcExpTotal() 함수
+   → 입력칸에 숫자를 넣을 때마다 자동으로 더해요 (oninput 이벤트)
+   → 예산 대비 몇 % 썼는지 막대 그래프로도 보여줘요 (빨간색=초과!)
+
+⑦ 즐겨찾기 → toggleFav() 함수
+   → 별 버튼을 누르면 S.favorites 바구니에 담거나 꺼내요
+   → 즐겨찾기 탭에서 모아보고 ✕로 제거할 수 있어요
+
+⑧ 이전 기록 → saveHistory() / loadHist() 함수
+   → 저장 버튼 → S.history 배열 맨 앞에 현재 계획을 추가해요
+   → 카드를 누르면 그때 계획을 다시 불러와요
+
+──────────────────────────────
+💡 핵심 비유 한 줄 정리
+  HTML  = 집의 뼈대와 방 구조
+  CSS   = 집의 색칠·인테리어
+  JS    = 집 안에서 움직이는 모든 것 (불 켜기, 문 열기)
+  API   = 배달 서비스 (AI에게 주문하고 결과를 받아옴)
+════════════════════════════════════════════════ -->
+
+</body>
+</html>
